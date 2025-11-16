@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Pattern, DrumMachineState, STEPS } from '../types';
-import { audioService } from '../services/AudioService';
+import { unifiedAudioService } from '../services/UnifiedAudioService';
 
 export const useDrumMachine = (initialPattern: Pattern, initialTempo: number) => {
   const [state, setState] = useState<DrumMachineState>({
@@ -25,7 +25,7 @@ export const useDrumMachine = (initialPattern: Pattern, initialTempo: number) =>
           prev.pattern.steps.forEach((instrumentSteps, instrumentIndex) => {
             if (instrumentSteps[prev.currentStep]) {
               const instrumentId = prev.pattern.instruments[instrumentIndex];
-              audioService.playSound(instrumentId);
+              unifiedAudioService.playSound(instrumentId);
             }
           });
 

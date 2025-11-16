@@ -72,9 +72,23 @@ RythmBox/
 5. **Sauvegarder** : Donnez un nom à votre pattern et sauvegardez-le
 6. **Charger** : Retrouvez vos patterns sauvegardés dans "My Patterns"
 
-## Note sur les samples audio
+## 🎵 Modes Audio
 
-Pour que l'application fonctionne avec de l'audio, vous devez ajouter des fichiers audio dans le dossier `assets/sounds/`. Consultez `assets/README.md` pour plus d'informations.
+L'application offre deux modes audio :
+
+### 🎹 Mode MIDI (actif par défaut)
+- Sons synthétiques générés en temps réel avec **Tone.js**
+- Fonctionne **immédiatement** sans configuration
+- Léger et performant
+- Parfait pour le prototypage et les tests
+
+### 🔊 Mode WAV (optionnel)
+- Samples audio réalistes de haute qualité
+- Nécessite des fichiers WAV (voir `assets/README.md`)
+- Son professionnel et authentique
+- Idéal pour la production finale
+
+Basculez entre les deux modes via le toggle "Mode Audio" dans l'interface.
 
 ## Prochaines améliorations
 

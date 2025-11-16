@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, SafeAreaView, StatusBar, ScrollView, Text } from 'react-native';
-import { audioService } from './src/services/AudioService';
+import { unifiedAudioService, AudioMode } from './src/services/UnifiedAudioService';
 import { storageService } from './src/services/StorageService';
 import { useDrumMachine } from './src/hooks/useDrumMachine';
 import { Sequencer } from './src/components/Sequencer';
 import { Controls } from './src/components/Controls';
 import { PresetSelector } from './src/components/PresetSelector';
 import { PatternManager } from './src/components/PatternManager';
+import { AudioModeToggle } from './src/components/AudioModeToggle';
 import { PRESETS, getEmptyPattern } from './src/presets';
 import { Pattern } from './src/types';
 
 export default function App() {
   const [savedPatterns, setSavedPatterns] = useState<Pattern[]>([]);
   const [isReady, setIsReady] = useState(false);
+  const [audioMode, setAudioMode] = useState<AudioMode>('midi');
+  const [hasWavSounds, setHasWavSounds] = useState(false);
 
   const {
     state,
@@ -27,17 +30,23 @@ export default function App() {
   useEffect(() => {
     const initialize = async () => {
       try {
-        // Initialize audio
-        await audioService.initialize();
+        // Initialize audio in MIDI mode by default
+        await unifiedAudioService.initialize('midi');
 
-        // Load drum samples
-        // Note: In a real app, you would need actual audio files
-        // For now, we'll use placeholder URLs or local files
-        const instruments = ['kick', 'snare', 'hihat', 'clap', 'tom', 'cymbal'];
-        for (const instrument of instruments) {
-          // You would load actual audio files here
-          // await audioService.loadSound(instrument, require(`./assets/sounds/${instrument}.wav`));
-        }
+        // Try to load WAV samples if they exist
+        // Uncomment and use these lines when you have WAV files:
+        /*
+        const soundSources = new Map([
+          ['kick', require('./assets/sounds/kick.wav')],
+          ['snare', require('./assets/sounds/snare.wav')],
+          ['hihat', require('./assets/sounds/hihat.wav')],
+          ['clap', require('./assets/sounds/clap.wav')],
+          ['tom', require('./assets/sounds/tom.wav')],
+          ['cymbal', require('./assets/sounds/cymbal.wav')],
+        ]);
+        await unifiedAudioService.loadAllWavSounds(soundSources);
+        setHasWavSounds(unifiedAudioService.hasWavSounds());
+        */
 
         // Load saved patterns
         const patterns = await storageService.loadPatterns();
@@ -57,7 +66,7 @@ export default function App() {
     initialize();
 
     return () => {
-      audioService.unloadAll();
+      unifiedAudioService.unloadAll();
     };
   }, []);
 
@@ -100,6 +109,11 @@ export default function App() {
     await storageService.saveTempo(tempo);
   };
 
+  const handleAudioModeChange = async (mode: AudioMode) => {
+    await unifiedAudioService.switchMode(mode);
+    setAudioMode(mode);
+  };
+
   if (!isReady) {
     return (
       <SafeAreaView style={styles.container}>
@@ -117,6 +131,12 @@ export default function App() {
         <View style={styles.content}>
           <Text style={styles.title}>RythmBox</Text>
           <Text style={styles.subtitle}>Beat Maker</Text>
+
+          <AudioModeToggle
+            currentMode={audioMode}
+            hasWavSounds={hasWavSounds}
+            onModeChange={handleAudioModeChange}
+          />
 
           <PresetSelector
             presets={PRESETS}
