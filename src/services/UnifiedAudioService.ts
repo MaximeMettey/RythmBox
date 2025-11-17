@@ -22,13 +22,16 @@ export class UnifiedAudioService {
       if (mode === 'midi') {
         await midiSynthService.initialize();
       } else {
-        // Initialiser l'audio pour les fichiers WAV
+        // Initialiser l'audio pour les fichiers WAV avec configuration basse latence
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: false,
           staysActiveInBackground: true,
           playsInSilentModeIOS: true,
           shouldDuckAndroid: true,
           playThroughEarpieceAndroid: false,
+          // Configuration pour réduire la latence
+          interruptionModeIOS: 1, // DoNotMix
+          interruptionModeAndroid: 1, // DoNotMix
         });
       }
 
@@ -56,7 +59,17 @@ export class UnifiedAudioService {
 
   async loadSound(id: string, source: any): Promise<void> {
     try {
-      const { sound } = await Audio.Sound.createAsync(source);
+      // Charger avec options optimisées pour la latence
+      const { sound } = await Audio.Sound.createAsync(
+        source,
+        {
+          shouldPlay: false,
+          isLooping: false,
+          progressUpdateIntervalMillis: 1000, // Minimal updates pour réduire overhead
+        },
+        null, // Pas de callback de statut
+        false // Pas de download en background
+      );
       this.sounds.set(id, sound);
       this.wavSoundsLoaded = true;
     } catch (error) {
@@ -72,6 +85,9 @@ export class UnifiedAudioService {
         playsInSilentModeIOS: true,
         shouldDuckAndroid: true,
         playThroughEarpieceAndroid: false,
+        // Configuration pour réduire la latence
+        interruptionModeIOS: 1, // DoNotMix
+        interruptionModeAndroid: 1, // DoNotMix
       });
 
       for (const [id, source] of soundSources.entries()) {
@@ -94,7 +110,11 @@ export class UnifiedAudioService {
       } else {
         const sound = this.sounds.get(id);
         if (sound) {
-          await sound.replayAsync();
+          // Optimisation : fire-and-forget pour latence minimale
+          // On ne bloque pas l'exécution avec await
+          sound.setPositionAsync(0).then(() => {
+            sound.playAsync().catch(() => {});
+          }).catch(() => {});
         } else {
           console.warn(`WAV sound not loaded for ${id}, falling back to MIDI`);
           await midiSynthService.playSound(id);
