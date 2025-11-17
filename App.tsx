@@ -37,7 +37,6 @@ export default function App() {
 
         // Try to load WAV samples if they exist
         // Uncomment and use these lines when you have WAV files:
-        /*
         const soundSources = new Map([
           ['kick', require('./assets/sounds/kick.wav')],
           ['snare', require('./assets/sounds/snare.wav')],
@@ -48,7 +47,6 @@ export default function App() {
         ]);
         await unifiedAudioService.loadAllWavSounds(soundSources);
         setHasWavSounds(unifiedAudioService.hasWavSounds());
-        */
 
         // Load saved patterns
         const patterns = await storageService.loadPatterns();
