@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "RythmBox",
+    "slug": "rythmbox",
+    "version": "1.0.0",
+    "sdkVersion": "54.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rythmbox.app"
+    },
+    "android": {
+      "package": "com.rythmbox.app"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

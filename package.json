@@ -1,0 +1,38 @@
+{
+  "name": "rythmbox",
+  "version": "1.0.0",
+  "description": "",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "setup-audio": "node scripts/setup-audio.js",
+    "clean": "rm -rf node_modules .expo .expo-shared && npm install",
+    "reset": "watchman watch-del-all && rm -rf node_modules .expo .expo-shared package-lock.json && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:25457/git/MaximeMettey/RythmBox"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/slider": "5.0.1",
+    "expo": "~54.0.23",
+    "expo-av": "~16.0.7",
+    "expo-status-bar": "~3.0.8",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "tone": "^15.1.22"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@types/react": "~19.1.10",
+    "babel-preset-expo": "~54.0.7",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RythmBox - Générateur de Samples</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/15.1.22/Tone.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0f0f1e;
+      color: #fff;
+    }
+    h1 { color: #4ECDC4; }
+    button {
+      background: #4ECDC4;
+      color: #fff;
+      border: none;
+      padding: 15px 30px;
+      margin: 10px 5px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    button:hover { background: #45B7D1; }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .sample-item {
+      background: #1a1a2e;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .status.pending { background: #666; }
+    .status.recording { background: #FFA07A; }
+    .status.done { background: #4ECDC4; }
+    #log {
+      background: #1a1a2e;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🥁 RythmBox - Générateur de Samples Synthétiques</h1>
+  <p>Générez des samples de batterie synthétiques pour RythmBox</p>
+
+  <button id="startBtn" onclick="generateAllSamples()">🎵 Générer tous les samples</button>
+  <button id="testBtn" onclick="testSamples()">▶️ Tester les samples</button>
+
+  <div id="samples">
+    <div class="sample-item">
+      <span>🥁 Kick (Grosse caisse)</span>
+      <span class="status pending" id="kick-status">En attente</span>
+    </div>
+    <div class="sample-item">
+      <span>🥁 Snare (Caisse claire)</span>
+      <span class="status pending" id="snare-status">En attente</span>
+    </div>
+    <div class="sample-item">
+      <span>🥁 Hi-Hat (Charleston)</span>
+      <span class="status pending" id="hihat-status">En attente</span>
+    </div>
+    <div class="sample-item">
+      <span>🥁 Clap</span>
+      <span class="status pending" id="clap-status">En attente</span>
+    </div>
+    <div class="sample-item">
+      <span>🥁 Tom</span>
+      <span class="status pending" id="tom-status">En attente</span>
+    </div>
+    <div class="sample-item">
+      <span>🥁 Cymbal (Cymbale)</span>
+      <span class="status pending" id="cymbal-status">En attente</span>
+    </div>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+    const samples = {};
+    let recorder;
+
+    function log(message) {
+      const logDiv = document.getElementById('log');
+      logDiv.innerHTML += message + '<br>';
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function setStatus(instrument, status) {
+      const statusEl = document.getElementById(`${instrument}-status`);
+      statusEl.className = `status ${status}`;
+      statusEl.textContent = status === 'pending' ? 'En attente' :
+                            status === 'recording' ? 'Enregistrement...' :
+                            '✅ Terminé';
+    }
+
+    async function recordSample(instrument, synth, duration, note) {
+      setStatus(instrument, 'recording');
+      log(`🎵 Enregistrement de ${instrument}...`);
+
+      // Créer un enregistreur
+      const dest = Tone.getContext().createMediaStreamDestination();
+      synth.connect(dest);
+
+      const mediaRecorder = new MediaRecorder(dest.stream);
+      const chunks = [];
+
+      mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+
+      return new Promise((resolve) => {
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(chunks, { type: 'audio/wav' });
+          samples[instrument] = blob;
+
+          setStatus(instrument, 'done');
+          log(`✅ ${instrument} enregistré (${(blob.size / 1024).toFixed(1)} KB)`);
+          resolve();
+        };
+
+        mediaRecorder.start();
+
+        // Jouer le son
+        if (note) {
+          synth.triggerAttackRelease(note, duration);
+        } else {
+          synth.triggerAttackRelease(duration);
+        }
+
+        // Arrêter l'enregistrement après la durée
+        setTimeout(() => {
+          mediaRecorder.stop();
+          synth.disconnect(dest);
+        }, duration * 1000 + 100);
+      });
+    }
+
+    async function generateAllSamples() {
+      document.getElementById('startBtn').disabled = true;
+      log('🚀 Démarrage de la génération...');
+
+      await Tone.start();
+
+      // Kick
+      const kickSynth = new Tone.MembraneSynth({
+        pitchDecay: 0.05,
+        octaves: 10,
+        oscillator: { type: 'sine' },
+        envelope: {
+          attack: 0.001,
+          decay: 0.4,
+          sustain: 0.01,
+          release: 1.4,
+          attackCurve: 'exponential',
+        },
+      }).toDestination();
+      await recordSample('kick', kickSynth, 1.0, 'C1');
+      kickSynth.dispose();
+
+      // Snare
+      const snareSynth = new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: {
+          attack: 0.001,
+          decay: 0.2,
+          sustain: 0,
+          release: 0.2,
+        },
+      }).toDestination();
+      await recordSample('snare', snareSynth, 0.4);
+      snareSynth.dispose();
+
+      // Hi-Hat
+      const hihatSynth = new Tone.MetalSynth({
+        frequency: 200,
+        envelope: {
+          attack: 0.001,
+          decay: 0.1,
+          release: 0.01,
+        },
+        harmonicity: 5.1,
+        modulationIndex: 32,
+        resonance: 4000,
+        octaves: 1.5,
+      }).toDestination();
+      await recordSample('hihat', hihatSynth, 0.15);
+      hihatSynth.dispose();
+
+      // Clap
+      const clapSynth = new Tone.NoiseSynth({
+        noise: { type: 'pink' },
+        envelope: {
+          attack: 0.001,
+          decay: 0.15,
+          sustain: 0,
+          release: 0.15,
+        },
+      }).toDestination();
+      await recordSample('clap', clapSynth, 0.3);
+      clapSynth.dispose();
+
+      // Tom
+      const tomSynth = new Tone.MembraneSynth({
+        pitchDecay: 0.08,
+        octaves: 6,
+        oscillator: { type: 'sine' },
+        envelope: {
+          attack: 0.001,
+          decay: 0.5,
+          sustain: 0.01,
+          release: 1,
+        },
+      }).toDestination();
+      await recordSample('tom', tomSynth, 0.8, 'G1');
+      tomSynth.dispose();
+
+      // Cymbal
+      const cymbalSynth = new Tone.MetalSynth({
+        frequency: 250,
+        envelope: {
+          attack: 0.001,
+          decay: 0.4,
+          release: 0.3,
+        },
+        harmonicity: 3.1,
+        modulationIndex: 16,
+        resonance: 3000,
+        octaves: 1.5,
+      }).toDestination();
+      await recordSample('cymbal', cymbalSynth, 1.5);
+      cymbalSynth.dispose();
+
+      log('🎉 Tous les samples générés !');
+      log('📥 Téléchargez les fichiers ci-dessous :');
+
+      // Créer les liens de téléchargement
+      for (const [name, blob] of Object.entries(samples)) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${name}.wav`;
+        a.textContent = `Télécharger ${name}.wav`;
+        a.style.cssText = 'display:block; margin:10px 0; color:#4ECDC4; text-decoration:none;';
+        document.getElementById('log').appendChild(a);
+      }
+
+      document.getElementById('testBtn').disabled = false;
+    }
+
+    async function testSamples() {
+      await Tone.start();
+      const player = new Tone.Player().toDestination();
+
+      for (const [name, blob] of Object.entries(samples)) {
+        const url = URL.createObjectURL(blob);
+        player.load(url).then(() => {
+          log(`▶️ Test: ${name}`);
+          player.start();
+        });
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+    }
+  </script>
+</body>
+</html>
