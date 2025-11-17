@@ -20,6 +20,8 @@ Une boîte à rythme cross-platform pour musiciens, disponible sur mobile (iOS, 
 
 ## Installation
 
+### Installation normale
+
 ```bash
 # Installer les dépendances
 npm install
@@ -36,6 +38,36 @@ npm run ios
 # Lancer sur Web
 npm run web
 ```
+
+### 🔧 En cas de problème
+
+Si vous rencontrez l'erreur **"Cannot find module 'babel-preset-expo'"** ou **"Unable to resolve asset"** :
+
+**Solution rapide (Linux/Mac) :**
+```bash
+./fix-install.sh
+```
+
+**Solution rapide (Windows) :**
+```bash
+fix-install.bat
+```
+
+**Ou manuellement :**
+```bash
+# Linux/Mac
+rm -rf node_modules .expo .expo-shared package-lock.json
+npm install
+npm start
+
+# Windows
+rmdir /s /q node_modules .expo .expo-shared
+del package-lock.json
+npm install
+npm start
+```
+
+Voir aussi : [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) pour plus d'aide.
 
 ## Structure du projet
 
