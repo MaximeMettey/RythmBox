@@ -108,19 +108,23 @@ RythmBox/
 
 L'application offre deux modes audio :
 
-### 🎹 Mode MIDI (actif par défaut)
+### 🎹 Mode MIDI (Web uniquement)
+- ⚠️ **Disponible uniquement sur navigateur Web**
 - Sons synthétiques générés en temps réel avec **Tone.js**
 - Fonctionne **immédiatement** sans configuration
 - Léger et performant
 - Parfait pour le prototypage et les tests
+- **Non disponible sur iOS/Android** (Tone.js utilise Web Audio API)
 
-### 🔊 Mode WAV (optionnel)
+### 🔊 Mode WAV (Recommandé pour mobile)
+- ✅ **Fonctionne sur toutes les plateformes** (iOS, Android, Web)
 - Samples audio réalistes de haute qualité
 - Nécessite des fichiers WAV (voir `assets/README.md`)
 - Son professionnel et authentique
 - Idéal pour la production finale
+- **Mode par défaut sur mobile**
 
-Basculez entre les deux modes via le toggle "Mode Audio" dans l'interface.
+Basculez entre les deux modes via le toggle "Mode Audio" dans l'interface (Web uniquement pour MIDI).
 
 ## Prochaines améliorations
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, SafeAreaView, StatusBar, ScrollView, Text } from 'react-native';
+import { StyleSheet, View, SafeAreaView, StatusBar, ScrollView, Text, Platform } from 'react-native';
 import { unifiedAudioService, AudioMode } from './src/services/UnifiedAudioService';
 import { storageService } from './src/services/StorageService';
 import { useDrumMachine } from './src/hooks/useDrumMachine';
@@ -14,7 +14,8 @@ import { Pattern } from './src/types';
 export default function App() {
   const [savedPatterns, setSavedPatterns] = useState<Pattern[]>([]);
   const [isReady, setIsReady] = useState(false);
-  const [audioMode, setAudioMode] = useState<AudioMode>('midi');
+  // MIDI disponible uniquement sur Web, WAV par défaut sur mobile
+  const [audioMode, setAudioMode] = useState<AudioMode>(Platform.OS === 'web' ? 'midi' : 'wav');
   const [hasWavSounds, setHasWavSounds] = useState(false);
 
   const {
@@ -30,8 +31,9 @@ export default function App() {
   useEffect(() => {
     const initialize = async () => {
       try {
-        // Initialize audio in MIDI mode by default
-        await unifiedAudioService.initialize('midi');
+        // Initialize audio: MIDI sur Web, WAV sur mobile
+        const initialMode = Platform.OS === 'web' ? 'midi' : 'wav';
+        await unifiedAudioService.initialize(initialMode);
 
         // Try to load WAV samples if they exist
         // Uncomment and use these lines when you have WAV files:

@@ -1,8 +1,10 @@
 import * as Tone from 'tone';
+import { Platform } from 'react-native';
 
 /**
  * Service pour générer des sons de batterie synthétiques en utilisant Tone.js
- * Alternative légère aux fichiers WAV pour avoir du son immédiatement
+ * ⚠️ ATTENTION : Fonctionne uniquement sur Web !
+ * Tone.js utilise Web Audio API qui n'est pas disponible sur iOS/Android natif
  */
 export class MidiSynthService {
   private synths: Map<string, any> = new Map();
@@ -10,6 +12,12 @@ export class MidiSynthService {
 
   async initialize() {
     if (this.isInitialized) return;
+
+    // Tone.js ne fonctionne que sur Web
+    if (Platform.OS !== 'web') {
+      console.warn('MIDI Synth is only available on Web platform. Use WAV mode on mobile.');
+      return;
+    }
 
     try {
       // Kick - Grosse caisse synthétique
@@ -103,6 +111,11 @@ export class MidiSynthService {
   }
 
   async playSound(id: string): Promise<void> {
+    // Ne fonctionne que sur Web
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
     try {
       // Démarrer le contexte audio si ce n'est pas déjà fait
       if (Tone.context.state !== 'running') {
@@ -111,8 +124,7 @@ export class MidiSynthService {
 
       const synth = this.synths.get(id);
       if (!synth) {
-        console.warn(`Synth not found for ${id}`);
-        return;
+        return; // Pas de warning si pas sur web
       }
 
       const now = Tone.now();

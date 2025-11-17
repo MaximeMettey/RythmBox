@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { AudioMode } from '../services/UnifiedAudioService';
 
 interface AudioModeToggleProps {
@@ -13,6 +13,8 @@ export const AudioModeToggle: React.FC<AudioModeToggleProps> = ({
   hasWavSounds,
   onModeChange,
 }) => {
+  const isMidiAvailable = Platform.OS === 'web';
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Mode Audio</Text>
@@ -22,13 +24,16 @@ export const AudioModeToggle: React.FC<AudioModeToggleProps> = ({
             styles.toggleButton,
             styles.leftButton,
             currentMode === 'midi' && styles.activeButton,
+            !isMidiAvailable && styles.disabledButton,
           ]}
-          onPress={() => onModeChange('midi')}
+          onPress={() => isMidiAvailable && onModeChange('midi')}
+          disabled={!isMidiAvailable}
         >
           <Text
             style={[
               styles.toggleText,
               currentMode === 'midi' && styles.activeText,
+              !isMidiAvailable && styles.disabledText,
             ]}
           >
             🎹 MIDI
@@ -62,6 +67,12 @@ export const AudioModeToggle: React.FC<AudioModeToggleProps> = ({
           ? 'Sons synthétiques générés en temps réel'
           : 'Samples audio réalistes'}
       </Text>
+
+      {!isMidiAvailable && (
+        <Text style={styles.warning}>
+          ⚠️ Mode MIDI disponible uniquement sur Web. Sur mobile, utilisez le mode WAV.
+        </Text>
+      )}
 
       {!hasWavSounds && (
         <Text style={styles.info}>
@@ -136,5 +147,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  warning: {
+    color: '#FFD700',
+    fontSize: 11,
+    marginTop: 8,
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });
